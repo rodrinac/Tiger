@@ -7,5 +7,5 @@ Limitation:
  
 ### Usage
 
-Simply put this line in your .pro qmake file: include(tiger.pri) 
+Simply put this line in your .pro qmake file: include(tiger.pri).
 And you'll able to use like a system header (<tiger>) 
