@@ -20,8 +20,7 @@
 #define TIGER_H
 
 namespace Tiger {
-   // [Beta]
-   static const char * const libVersion {"1.0.0"};
+   static const char * const libVersion {"1.1.0"};
 }
 
 #endif // TIGER_H

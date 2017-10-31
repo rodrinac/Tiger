@@ -1,27 +1,19 @@
 #include <QtDebug>
+#include <tiger>
 
-#include "../../src/tiger.hpp"
-#include "../../src/reader.hpp"
-#include "../../src/writer.hpp"
+#include "../shared/player.h"
 
-#include "../shared/player.hpp"
-
-int main(int argc, char *argv[])
+int main()
 {
     qDebug() << "Using Tiger version " << Tiger::libVersion << endl;
 
-    QJsonObject jsobj {
-        {"id", 1},
-        {"name", "Matheux"}
-    };
+    auto p = Tiger::Reader<Player>::instance().createEntity({ {"id", 1}, {"name", "Phoenix"} });
 
-    Player * p = Tiger::Reader<Player>::instance().createEntity(jsobj);
+    p->setObjectName("mainPlayer");
 
-    p->setObjectName("MyPlayer");
-
-    QJsonObject jsObj = Tiger::Writer<Player>::instance().getJsonObject(p);
+    QJsonObject jsobj = Tiger::Writer<Player>::instance().getJsonObject(p);
 
     qDebug() << p->toString();
 
-    qDebug() << endl << jsObj;
+    qDebug() << endl << jsobj;
 }

@@ -54,18 +54,12 @@ namespace Tiger {
         */
         Entity * createEntity(const QJsonObject &jsobj)
         {
-            const int size = Entity::staticMetaObject.propertyCount();
-
-            QList<QMetaProperty> properties;
             auto entity = new Entity();
 
-            for (int i = 0; i < size; ++i)
-                properties.append(Entity::staticMetaObject.property(i));
-
-
-            for (int j = 0; j < size; ++j)
-                entity->setProperty(properties[j].name(), jsobj[properties[j].name()].toVariant());
-
+            for (const auto &property : m_properties) {
+                if (property.isWritable() && jsobj.contains(property.name()))
+                    entity->setProperty(property.name(), jsobj[property.name()].toVariant());
+            }
 
             return entity;
         }
@@ -75,24 +69,19 @@ namespace Tiger {
         */
         QList<Entity *> createEntityList(const QJsonArray &jsarray)
         {
-            const int size = Entity::staticMetaObject.propertyCount();
             const int arraysize = jsarray.count();
 
-            if(arraysize < 1)
-                return QList<Entity *>();
-
-            QList<QMetaProperty> properties;
             QList<Entity *> entities;            
 
-            for (int i = 0; i < size; ++i)
-                properties.append(Entity::staticMetaObject.property(i));
+            for (const auto &value : jsarray) {
+                QJsonObject jsobj = value.toObject();
 
-            for (int i = 0; i < arraysize; ++i) {
                 auto e = new Entity();
-                QJsonObject jso = jsarray[i].toObject();
 
-                for (int j = 0; j < size; ++j)
-                    e->setProperty(properties[j].name(), jso[properties[j].name()].toVariant());
+                for (const auto &property : m_properties) {
+                    if (property.isWritable() && jsobj.contains(property.name()))
+                        e->setProperty(property.name(), jsobj[property.name()].toVariant());
+                }
 
                 entities.append(e);
 
@@ -102,7 +91,14 @@ namespace Tiger {
         }
 
     private:
+        QVector<QMetaProperty> m_properties;
+
         Reader() {
+            const int size = Entity::staticMetaObject.propertyCount();
+
+            for (int i = 0; i < size; ++i)
+                m_properties.append(Entity::staticMetaObject.property(i));
+
 #ifdef TIGER_SUPER_VERBOSE
             qDebug("Tiger::Reader<%s> created", Entity::staticMetaObject.className());
 #endif

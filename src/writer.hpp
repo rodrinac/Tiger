@@ -23,7 +23,7 @@
 #include <QMetaProperty>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <QList>
+#include <QVector>
 
 namespace Tiger {
 
@@ -55,16 +55,12 @@ namespace Tiger {
         */
         QJsonObject getJsonObject(Entity *entity, bool excludeObjectName = false)
         {
-            const int size = Entity::staticMetaObject.propertyCount();
+            const int propertyCount = m_properties.size();
 
-            QList<QMetaProperty> properties;
             QJsonObject jso;
 
-            for (int i = 0; i < size; ++i)
-                properties.append(Entity::staticMetaObject.property(i));
-
-            for (int j = excludeObjectName? 1 : 0; j < size; ++j)
-                jso.insert(properties[j].name(), QJsonValue::fromVariant(entity->property(properties[j].name())));
+            for (int i = excludeObjectName? 1 : 0; i < propertyCount; ++i)
+                jso.insert(m_properties[i].name(), QJsonValue::fromVariant(entity->property(m_properties[i].name())));
 
             return jso;
         }
@@ -75,23 +71,15 @@ namespace Tiger {
         */
         QJsonArray getJsonArray(const QList<Entity *> &entities, bool excludeObjectName = false)
         {
-            const int size = Entity::staticMetaObject.propertyCount();
-            const int arraysize = entities.count();
+            const int propertyCount = m_properties.size();
 
-            if(arraysize < 1)
-                return QJsonArray();
-
-            QList<QMetaProperty> properties;
             QJsonArray jsarray;
-
-            for (int i = 0; i < size; ++i)
-                properties.append(Entity::staticMetaObject.property(i));     
 
             for (auto e : entities) {
                 QJsonObject jso;
 
-                for (int j = excludeObjectName? 1 : 0; j < size; ++j)
-                    jso.insert(properties[j].name(), QJsonValue::fromVariant(e->property(properties[j].name())));
+                for (int i = excludeObjectName? 1 : 0; i < propertyCount; ++i)
+                    jso.insert(m_properties[i].name(), QJsonValue::fromVariant(e->property(m_properties[i].name())));
 
                 jsarray.append(jso);
             }
@@ -100,7 +88,14 @@ namespace Tiger {
         }
 
     private:
+        QVector<QMetaProperty> m_properties;
+
         Writer() {
+            const int size = Entity::staticMetaObject.propertyCount();
+
+            for (int i = 0; i < size; ++i)
+                m_properties.append(Entity::staticMetaObject.property(i));
+
 #ifdef TIGER_SUPER_VERBOSE
             qDebug("Tiger::Writer<%s> created", Entity::staticMetaObject.className());
 #endif
